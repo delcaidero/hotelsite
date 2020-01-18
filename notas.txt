@@ -1,0 +1,15 @@
+
+from reservas.models import BookingSeason, RoomType, RoomDescription, SeasonRoomPrice, RoomBooking, SeasonBookingCalendar
+
+
+
+BookingSeason.objects.all()
+
+from django.utils import timezone
+import datetime
+
+
+season = BookingSeason(season_text="Temporada 2020", start_check_in_date=timezone.now(), end_check_out_date=datetime.datetime(2020, 12, 31, 23, 59, 59, 49011))
+season.save()
+
+    django.utils.timezone
