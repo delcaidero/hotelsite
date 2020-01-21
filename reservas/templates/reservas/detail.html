@@ -1,0 +1,7 @@
+{{ season }}
+<h1>{{ season.season_text }}</h1>
+<ul>
+{% for choice in season.choice_set.all %}
+    <li>{{ choice.choice_text }}</li>
+{% endfor %}
+</ul>

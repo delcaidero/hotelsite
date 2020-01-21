@@ -1,4 +1,17 @@
 
+
+####################3
+
+para reiniciar las migraciones
+
+python3 manage.py makemigrations
+python3 manage.py migrate
+
+
+####################
+
+
+
 from reservas.models import BookingSeason, RoomType, RoomDescription, SeasonRoomPrice, RoomBooking, SeasonBookingCalendar
 
 

@@ -1,0 +1,9 @@
+{% if latest_season_list %}
+    <ul>
+    {% for season in latest_season_list %}
+        <li><a href="/reservas/{{ season.id }}/">{{ season.season_text }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}
