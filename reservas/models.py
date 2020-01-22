@@ -1,13 +1,33 @@
 import datetime
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
+import random
+import string
 
+
+class Robot(object):
+
+    def __init__(self):
+        self.name = ''
+        self.robotState = random.getstate()
+        self.reset()
+
+    def reset(self):
+        random.setstate(self.robotState)
+        alphabet = set(string.ascii_lowercase[:28])
+        prefix = random.sample(alphabet, k=2)
+        prefix = ''.join(str(e) for e in prefix).upper()
+        number = random.sample(range(9), k=3)
+        number = ''.join(str(e) for e in number)
+        self.name = prefix + number
+        self.robotState = random.getstate()
 
 
 class BookingSeason(models.Model):
-    season_text = models.CharField(max_length=200)
-    start_check_in_date = models.DateTimeField('Check in date')
-    end_check_out_date = models.DateTimeField('Check out date')
+    season_text = models.CharField('Season title',max_length=200)
+    start_check_in_date = models.DateTimeField('Season start')
+    end_check_out_date = models.DateTimeField('Season ends')
 
     def __str__(self):
         return self.season_text
@@ -17,7 +37,17 @@ class BookingSeason(models.Model):
         return periodo.days
 
     def total_rooms_type(self,type):
-        return  RoomDescription.objects.filter(room_type=type).count()
+        return RoomDescription.objects.filter(room_type=type).count()
+
+    def display_room_bookings(self):
+        return self.roombooking_set.count()
+
+    display_room_bookings.short_description = 'Bookings'
+
+    def display_nights_booked(self):
+        return sum([booking.get_nights() for booking in self.roombooking_set.all()])
+
+    display_nights_booked.short_description = 'Nights booked'
 
 
 class RoomType(models.Model):
