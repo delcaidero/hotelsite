@@ -4,16 +4,43 @@
     <h1>Booking List</h1>
 
     {% if object_list %}
-    <ul>
 
-      {% for booking in object_list %}
-      <li>
-        <a href="{{ booking.get_absolute_url }}">{{ booking.check_in_date }}</a> ({{booking.room_type}})
-      </li>
-      {% endfor %}
+    <h2>Booking list</h2>
+          <div class="table-responsive">
+            <table class="table table-striped table-sm">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Entrada</th>
+                  <th>Salida</th>
+                  <th>Tipo Habitación</th>
+                  <th>Nº Huéspedes</th>
+                  <th>Contacto</th>
+                  <th>Precio reserva</th>
+                  <th>Localizador</th>
+                  <th>Nº Habitación</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for booking in object_list %}
+                <tr>
+                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.id }}</a></td>
+                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.check_in_date }}</a></td>
+                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.check_out_date }}</a></td>
+                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.room_type }}</a></td>
+                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.pax }}</a></td>
+                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.contact_email }}</a></td>
+                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.booking_price }}</a></td>
+                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.booking_localizator }}</a></td>
+                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.booking_localizator }}</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+      </div>
 
-    </ul>
     {% else %}
       <p>There are no room booking yet.</p>
-    {% endif %}       
+    {% endif %}
+
 {% endblock %}
