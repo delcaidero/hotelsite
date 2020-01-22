@@ -1,0 +1,19 @@
+{% extends "reservas/base_generic.html" %}
+
+{% block content %}
+    <h1>Booking List</h1>
+
+    {% if object_list %}
+    <ul>
+
+      {% for booking in object_list %}
+      <li>
+        <a href="{{ booking.get_absolute_url }}">{{ booking.check_in_date }}</a> ({{booking.room_type}})
+      </li>
+      {% endfor %}
+
+    </ul>
+    {% else %}
+      <p>There are no room booking yet.</p>
+    {% endif %}       
+{% endblock %}

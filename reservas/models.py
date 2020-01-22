@@ -102,7 +102,7 @@ class RoomBooking(models.Model):
         """
         Devuelve el URL a una instancia de reserva
         """
-        return reverse('roombooking-detail', args=[str(self.id)])
+        return reverse('booking-detail', args=[str(self.id)])
 
 
 class SeasonBookingCalendar(models.Model):
