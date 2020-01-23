@@ -17,3 +17,8 @@ urlpatterns = [
     # ex: /polls/5/vote/
     path('<int:question_id>/vote/', views.vote, name='vote'),
 ]
+
+urlpatterns += [
+    # path(r'^book/(?P<pk>[-\w]+)/renew/$', views.renew_book_librarian, name='booking-add'),
+    path('<int:season_id>/add/', views.add_booking, name='booking-add'),
+]
