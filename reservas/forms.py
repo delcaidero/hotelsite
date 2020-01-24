@@ -32,7 +32,7 @@ class AddBookingModelForm(ModelForm):
 
         # Check date is not in past.
         if data < datetime.date.today():
-            raise ValidationError(_('Invalid date - renewal in past'))
+            raise ValidationError(_('Invalid date - check-in in past'))
 
         # Check date is in range librarian allowed to change (+4 weeks).
         if data > datetime.date.today() + datetime.timedelta(weeks=4):
@@ -43,6 +43,16 @@ class AddBookingModelForm(ModelForm):
 
     class Meta:
         model = RoomBooking
-        fields = ['booking_season','check_in_date','check_out_date','room_type','pax','contact_name','contact_email','contact_phone','booking_date','booking_price','booking_comments','booking_localizator']
-        labels = {'check_in_date': _('Renewal date'), }
-        help_texts = {'check_in_date': _('Enter a date between now and 4 weeks (default 3).'), }
+        fields = ['check_in_date','check_out_date','room_type','room','pax','contact_name','contact_email','contact_phone','booking_price','booking_comments']
+        labels = {'check_in_date': _('Entrada'),
+                  'check_out_date': _('Salida'),
+                  'room_type': _('Tipo Hab.'),
+                  'room': _('Num. Hab.'),
+                  'pax': _('Huéspedes'),
+                  'contact_name': _('Nombre'),
+                  'contact_email': _('e-mail'),
+                  'contact_phone': _('Teléfono'),
+                  'booking_price': _('Total reserva'),
+                  'booking_comments': _('Observaciones'),
+                  }
+        #help_texts = {'check_in_date': _('Enter a date between now and 4 weeks (default 3).'), }

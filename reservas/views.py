@@ -8,7 +8,7 @@ from .models import BookingSeason, RoomType, RoomDescription, SeasonRoomPrice, R
 
 
 def index(request):
-    #latest_season_list = BookingSeason.objects.order_by('-start_check_in_date')[:5]
+    season = BookingSeason.objects.get(pk=5)
     #context = {'latest_season_list': latest_season_list}
     #return render(request, 'reservas/index.html', context)
     """
@@ -21,19 +21,8 @@ def index(request):
     return render(
         request,
         'reservas/index.html',
-        context={'num_bookings': num_bookings},
+        context={'num_bookings': num_bookings, 'season': season},
     )
-
-def detail(request, season_id):
-    season = get_object_or_404(BookingSeason, pk=season_id)
-    return render(request, 'reservas/detail.html', {'season': season})
-
-def results(request, question_id):
-    response = "You're looking at the results of question %s."
-    return HttpResponse(response % question_id)
-
-def vote(request, question_id):
-    return HttpResponse("You're voting on question %s." % question_id)
 
 
 class RoomBookingListView(generic.ListView):
@@ -41,6 +30,14 @@ class RoomBookingListView(generic.ListView):
     context_object_name = 'booking_list'
     #queryset = Book.objects.filter(title__icontains='war')[:5]  # Get 5 books containing the title war
     template_name = 'reservas/booking_list.html'
+
+    def get_context_data(self, **kwargs):
+        season = BookingSeason.objects.get(pk=5)
+        # Call the base implementation first to get a context
+        context = super(RoomBookingListView, self).get_context_data(**kwargs)
+        # Get the blog from id and add it to the context
+        context['season_url'] = season.get_add_booking_url()
+        return context
 
 
 class RoomBookingDetailView(generic.DetailView):
@@ -66,51 +63,29 @@ def add_booking(request, season_id):
     # If this is a POST request then process the Form data
     if request.method == 'POST':
 
-        # Create a form instance and populate it with data from the request (binding):
         form = AddBookingModelForm(request.POST)
 
-        # Check if the form is valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
+
             booking = form.save(commit=False)
+            booking.booking_season_id = season_id
             booking.check_in_date = form.cleaned_data['check_in_date']
             booking.booking_localizator = Robot().name
+            booking.booking_date = datetime.date.today()
+            booking.booking_price = booking.get_total_price()
+
+
             booking.save()
+            booking.set_calendar_dates()
 
             # redirect to a new URL:
             return HttpResponseRedirect(reverse('bookings') )
 
-    # If this is a GET (or any other method) create the default form.
     else:
         proposed_check_in_date = datetime.date.today()
-        #form = AddBookingForm(initial={'check_in_date': proposed_check_in_date,})
-        form = AddBookingModelForm(initial={'check_in_date': proposed_check_in_date,})
+        proposed_check_out_date = datetime.date.today() + datetime.timedelta(days=1)
+        form = AddBookingModelForm(initial={'check_in_date': proposed_check_in_date,
+                                            'check_out_date': proposed_check_out_date,
+                                            })
 
-    #return render(request, 'catalog/book_renew_librarian.html', {'form': form, 'bookinst':book_inst})
     return render(request, 'reservas/booking_add.html', {'form': form, 'season':season})
-
-
-def renew_book_librarian(request, pk):
-    book_inst=get_object_or_404(BookInstance, pk = pk)
-
-    # If this is a POST request then process the Form data
-    if request.method == 'POST':
-
-        # Create a form instance and populate it with data from the request (binding):
-        form = RenewBookForm(request.POST)
-
-        # Check if the form is valid:
-        if form.is_valid():
-            # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
-            book_inst.due_back = form.cleaned_data['renewal_date']
-            book_inst.save()
-
-            # redirect to a new URL:
-            return HttpResponseRedirect(reverse('all-borrowed') )
-
-    # If this is a GET (or any other method) create the default form.
-    else:
-        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
-        form = RenewBookForm(initial={'renewal_date': proposed_renewal_date,})
-
-    return render(request, 'catalog/book_renew_librarian.html', {'form': form, 'bookinst':book_inst})

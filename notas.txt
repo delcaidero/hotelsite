@@ -16,6 +16,17 @@ from reservas.models import BookingSeason, RoomType, RoomDescription, SeasonRoom
 
 
 
+from reservas.models import BookingSeason, RoomType, RoomDescription, SeasonRoomPrice, RoomBooking, SeasonBookingCalendar
+s = BookingSeason.objects.get(pk=5)
+rb = s.roombooking_set.get(pk=1)
+rb.seasonbookingcalendar_set.create(date=rb.check_in_date,check_in=True)
+rb.seasonbookingcalendar_set.create(date=rb.check_out_date,check_out=True)
+
+
+
+
+
+
 BookingSeason.objects.all()
 
 from django.utils import timezone

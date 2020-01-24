@@ -22,5 +22,5 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('reservas/', include('reservas.urls')),
     path('admin/', admin.site.urls),
-    path('/', RedirectView.as_view(url='/reservas/', permanent=True)),
+    path('', RedirectView.as_view(url='/reservas/', permanent=True)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
