@@ -7,15 +7,18 @@ admin.site.register(RoomType)
 # admin.site.register(RoomDescription)
 admin.site.register(SeasonRoomPrice)
 # admin.site.register(RoomBooking)
-admin.site.register(SeasonBookingCalendar)
+# admin.site.register(SeasonBookingCalendar)
+
 
 class SeasonRoomPriceInline(admin.TabularInline):
     model = SeasonRoomPrice
+
 
 @admin.register(BookingSeason)
 class BookingSeasonAdmin(admin.ModelAdmin):
     list_display = ('season_text', 'start_check_in_date', 'end_check_out_date', 'display_room_bookings', 'display_nights_booked')
     inlines = [SeasonRoomPriceInline]
+
 
 @admin.register(RoomBooking)
 class RoomBookingAdmin(admin.ModelAdmin):
@@ -30,6 +33,14 @@ class RoomBookingAdmin(admin.ModelAdmin):
         }),
     )
 
+
 @admin.register(RoomDescription)
 class RoomDescriptionAdmin(admin.ModelAdmin):
     list_display = ('room_number_text', 'room_type')
+
+
+@admin.register(SeasonBookingCalendar)
+class SeasonBookingCalendarAdmin(admin.ModelAdmin):
+        list_display = (
+        'date', 'check_in', 'check_out', 'room_booking', 'status')
+      #  inlines = [SeasonRoomPriceInline]

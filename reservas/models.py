@@ -1,7 +1,8 @@
 import datetime
 from django.db import models
+from django.db.models import Q, Count
 from django.urls import reverse
-from django.utils import timezone
+#from django.utils import timezone
 import random
 import string
 
@@ -25,7 +26,7 @@ class Robot(object):
 
 
 class BookingSeason(models.Model):
-    season_text = models.CharField('Season title',max_length=200)
+    season_text = models.CharField('Season title', max_length=200)
     start_check_in_date = models.DateTimeField('Season start')
     end_check_out_date = models.DateTimeField('Season ends')
 
@@ -85,14 +86,20 @@ class RoomBooking(models.Model):
     check_in_date = models.DateField('Check in date')
     check_out_date = models.DateField('Check out date')
     room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE)
-    room = models.ForeignKey(RoomDescription, on_delete=models.SET_NULL, null=True)
-    pax = models.IntegerField(default=1)
+    room = models.ForeignKey(RoomDescription, on_delete=models.SET_NULL, blank=True, null=True)
+    HUESPEDES = (
+        (1,'1'),
+        (2,'2'),
+        (3,'3'),
+        (4,'4'),
+    )
+    pax = models.IntegerField(default=1,choices = HUESPEDES)
     contact_name = models.CharField(max_length=200)
     contact_email = models.CharField(max_length=200)
     contact_phone = models.CharField(max_length=20)
     booking_date = models.DateTimeField('Booking date')
     booking_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    booking_comments = models.CharField(max_length=200)
+    booking_comments = models.CharField(max_length=200, blank=True, null=True)
     booking_localizator = models.CharField(max_length=6)
 
     def __str__(self):
@@ -106,12 +113,12 @@ class RoomBooking(models.Model):
         return reverse('booking-detail', args=[str(self.id)])
 
     def set_calendar_dates(self):
-        self.seasonbookingcalendar_set.create(date=self.check_in_date, check_in=True)
-        self.seasonbookingcalendar_set.create(date=self.check_out_date, check_out=True)
+        self.seasonbookingcalendar_set.create(date=self.check_in_date, check_in=True, status='r')
+        self.seasonbookingcalendar_set.create(date=self.check_out_date, check_out=True, status='r')
         i = 1
         while self.check_out_date > self.check_in_date + datetime.timedelta(days=i):
             booking_date = self.check_in_date + datetime.timedelta(days=i)
-            self.seasonbookingcalendar_set.create(date=booking_date)
+            self.seasonbookingcalendar_set.create(date=booking_date, status='r')
             i += 1
 
     def get_season_room_price(self):
@@ -120,6 +127,27 @@ class RoomBooking(models.Model):
     def get_total_price(self):
         return float(self.get_season_room_price().room_type_price) * self.get_nights()
 
+    # reservas coincidentes en fechas
+    def get_same_dates_same_type_bookings(self):
+        return SeasonBookingCalendar.objects.filter( Q(date__gte=self.check_in_date),
+                                                     Q(date__lte=self.check_out_date),
+                                                     Q(status='r'),
+                                                     Q(check_out=False),
+                                                     Q(room_booking__room_type=self.room_type))
+
+    # ocupacion por dia
+    def get_same_dates_same_type_day_occupancy(self):
+        return self.get_same_dates_same_type_bookings().values('date').annotate(reservas=Count('room_booking'))
+
+    #
+    def is_available(self):
+        reservas = list(self.get_same_dates_same_type_day_occupancy().values_list('reservas', flat=True))
+        rooms_availables = RoomDescription.objects.filter(room_type=self.room_type).count()
+        for r in reservas:
+            if r >= rooms_availables :return False
+        return True
+
+
 
 class SeasonBookingCalendar(models.Model):
     date = models.DateField()
@@ -127,5 +155,13 @@ class SeasonBookingCalendar(models.Model):
     check_out = models.BooleanField(default=False)
     room_booking = models.ForeignKey(RoomBooking, on_delete=models.CASCADE)
 
+    ROOM_BOOKING_STATUS = (
+        ('b', 'Bloqueada'),
+        ('r', 'Reserva'),
+        ('d', 'Disponible'),
+    )
+
+    status = models.CharField(max_length=1, choices=ROOM_BOOKING_STATUS, blank=True, default='d', help_text='Disponibilidad')
+
     def __str__(self):
-        return f'{self.date} ({self.room_booking_id})'
+        return f'{self.date} ({self.status})'

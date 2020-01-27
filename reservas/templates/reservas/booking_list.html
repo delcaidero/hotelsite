@@ -23,15 +23,15 @@
               <tbody>
               {% for booking in object_list %}
                 <tr>
-                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.id }}</a></td>
-                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.check_in_date }}</a></td>
-                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.check_out_date }}</a></td>
-                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.room_type }}</a></td>
-                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.pax }}</a></td>
-                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.contact_email }}</a></td>
-                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.booking_price }}</a></td>
-                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.booking_localizator }}</a></td>
-                  <td><a href="{{ booking.get_absolute_url }}">{{ booking.room }}</a></td>
+                  <td>{{ booking.id }}</td>
+                  <td>{{ booking.check_in_date }}</td>
+                  <td>{{ booking.check_out_date }}</td>
+                  <td>{{ booking.room_type }}</td>
+                  <td>{{ booking.pax }}</td>
+                  <td>{{ booking.contact_email }}</td>
+                  <td>{{ booking.booking_price }}</td>
+                  <td>{{ booking.booking_localizator }}</td>
+                  <td>{{ booking.room }}</td>
                 </tr>
               {% endfor %}
             </tbody>

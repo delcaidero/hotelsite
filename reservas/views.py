@@ -1,20 +1,16 @@
-#from django.http import HttpResponse
-#from django.template import loader
-#from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.views import generic
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+import datetime
+
+from .forms import AddBookingForm, AddBookingModelForm
 
 from .models import BookingSeason, RoomType, RoomDescription, SeasonRoomPrice, RoomBooking, SeasonBookingCalendar, Robot
 
 
 def index(request):
     season = BookingSeason.objects.get(pk=5)
-    #context = {'latest_season_list': latest_season_list}
-    #return render(request, 'reservas/index.html', context)
-    """
-    Función vista para la página inicio del sitio.
-    """
-    # Genera contadores de algunos de los objetos principales
     num_bookings = RoomBooking.objects.all().count()
 
     # Renderiza la plantilla HTML index.html con los datos en la variable contexto
@@ -28,7 +24,6 @@ def index(request):
 class RoomBookingListView(generic.ListView):
     model = RoomBooking
     context_object_name = 'booking_list'
-    #queryset = Book.objects.filter(title__icontains='war')[:5]  # Get 5 books containing the title war
     template_name = 'reservas/booking_list.html'
 
     def get_context_data(self, **kwargs):
@@ -44,21 +39,11 @@ class RoomBookingDetailView(generic.DetailView):
     model = RoomBooking
     template_name = 'reservas/booking_detail.html'
 
+
 ''' vistas para formularios'''
 
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
-#from django.core.urlresolvers import reverse
-from django.urls import reverse
-import datetime
-
-from .forms import AddBookingForm, AddBookingModelForm
-
 def add_booking(request, season_id):
-    #book_inst=get_object_or_404(BookInstance, pk = pk)
     season = get_object_or_404(BookingSeason, pk=season_id)
-    #booking = season.roombooking_set.create(request.POST)
-
 
     # If this is a POST request then process the Form data
     if request.method == 'POST':
@@ -70,10 +55,16 @@ def add_booking(request, season_id):
             booking = form.save(commit=False)
             booking.booking_season_id = season_id
             booking.check_in_date = form.cleaned_data['check_in_date']
+            booking.check_out_date = form.cleaned_data['check_out_date']
+            booking.room_type = form.cleaned_data['room_type']
+            booking.pax = form.cleaned_data["pax"]
             booking.booking_localizator = Robot().name
             booking.booking_date = datetime.date.today()
             booking.booking_price = booking.get_total_price()
 
+            if not booking.is_available():
+                form.add_error('room_type','Room type not available for booking dates')
+                return render(request, 'reservas/booking_add.html', {'form': form, 'season': season})
 
             booking.save()
             booking.set_calendar_dates()
